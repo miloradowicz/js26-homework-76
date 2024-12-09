@@ -45,6 +45,7 @@ const MessageForm = () => {
       <InputBase
         placeholder='Type your message...'
         sx={{ ml: 1, flex: 1 }}
+        value={data}
         onChange={handleChange}
       />
       <Divider sx={{ height: 28, m: 0.5 }} orientation='vertical' />
