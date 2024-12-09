@@ -6,7 +6,7 @@ import { RootState } from '@/app/store';
 interface State {
   username: string;
   messages: Message[];
-  lastUpdated: number;
+  lastUpdated?: number;
   lastError?: {
     message: string;
   };
@@ -15,7 +15,6 @@ interface State {
 const initialState: State = {
   username: 'miloradowicz',
   messages: [],
-  lastUpdated: 0,
 };
 
 const slice = createSlice({
@@ -38,7 +37,7 @@ const slice = createSlice({
         state.lastError = undefined;
       })
       .addCase(loadMessages.fulfilled, (state, { payload }) => {
-        state.messages = payload;
+        state.messages.push(...payload);
 
         state.lastUpdated = Math.max(
           ...state.messages.map((x) => Date.parse(x.datetime))

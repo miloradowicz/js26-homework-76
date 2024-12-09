@@ -1,52 +1,55 @@
 import { api } from '@/api';
 import { RootState } from '@/app/store';
 import { Message } from '@/types';
-import { createAsyncThunk, GetThunkAPI } from '@reduxjs/toolkit';
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import dayjs from 'dayjs';
 
-export const loadMessages = createAsyncThunk(
-  'chat/loadMessages',
-  async (datetime?: string) => {
-    const params = {
-      datetime,
-    };
+export const loadMessages = createAsyncThunk<
+  Message[],
+  void,
+  { state: RootState }
+>('chat/loadMessages', async (_, thunkAPI) => {
+  const lastUpdated = thunkAPI.getState().chatReducer.lastUpdated;
 
-    if (datetime && !Number.isNaN(Date.parse(datetime))) {
-      params.datetime = datetime;
-    }
+  let params: { datetime: string } | undefined = undefined;
 
-    const { data, status, statusText } = await api.get<Message[]>('messages', {
-      params,
-    });
-
-    if (status !== 200) {
-      throw new Error(statusText);
-    }
-
-    return data;
+  if (lastUpdated && !Number.isNaN(lastUpdated)) {
+    params = { datetime: dayjs(lastUpdated).toISOString() };
   }
-);
 
-export const sendMessage = createAsyncThunk(
-  'chat/sendMessage',
-  async (message: string, thunkAPI: GetThunkAPI<{ state: RootState }>) => {
-    const author = thunkAPI.getState().chatReducer.username;
-    if (!author) {
-      throw new Error('Invalid author.');
-    }
+  const { data, status, statusText } = await api.get<Message[]>('messages', {
+    params,
+  });
 
-    if (!message) {
-      throw new Error('Invalid message.');
-    }
-
-    const { data, status, statusText } = await api.post<Message>('messages', {
-      author,
-      message,
-    });
-
-    if (status !== 200) {
-      throw new Error(statusText);
-    }
-
-    return data;
+  if (status < 200 || status >= 400) {
+    throw new Error(statusText);
   }
-);
+
+  return data;
+});
+
+export const sendMessage = createAsyncThunk<
+  Message,
+  string,
+  { state: RootState }
+>('chat/sendMessage', async (message, thunkAPI) => {
+  const author = thunkAPI.getState().chatReducer.username;
+  if (!author) {
+    throw new Error('Invalid author.');
+  }
+
+  if (!message) {
+    throw new Error('Invalid message.');
+  }
+
+  const { data, status, statusText } = await api.post<Message>('messages', {
+    author,
+    message,
+  });
+
+  if (status < 200 || status >= 400) {
+    throw new Error(statusText);
+  }
+
+  return data;
+});
