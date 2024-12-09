@@ -5,6 +5,11 @@
   "scripts": {
     "dev": "nodemon index.ts"
   },
+  "nodemonConfig": {
+    "ignore": [
+      "db.json"
+    ]
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
