@@ -39,9 +39,9 @@ const slice = createSlice({
       .addCase(loadMessages.fulfilled, (state, { payload }) => {
         state.messages.push(...payload);
 
-        state.lastUpdated = Math.max(
-          ...state.messages.map((x) => Date.parse(x.datetime))
-        );
+        state.lastUpdated = state.messages.length
+          ? Math.max(...state.messages.map((x) => Date.parse(x.datetime)))
+          : undefined;
       })
       .addCase(loadMessages.rejected, (state, { error }) => {
         if (error.message !== undefined) {
