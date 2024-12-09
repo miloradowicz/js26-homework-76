@@ -23,22 +23,22 @@ router.get('/', (req, res) => {
 router.post('/', async (req, res) => {
   const body = req.body as MessageBody;
 
-  if (body.author || body.message) {
+  if (!body.author || !body.message) {
     res
       .status(400)
       .send({ error: 'Author and message must be present in the request.' });
+  } else {
+    const message = {
+      id: crypto.randomUUID(),
+      author: body.author,
+      message: body.message,
+      datetime: new Date().toISOString(),
+    };
+
+    await fileDb.addItem(message);
+
+    res.send(message);
   }
-
-  const message = {
-    id: crypto.randomUUID(),
-    author: body.author,
-    message: body.message,
-    datetime: new Date().toISOString(),
-  };
-
-  await fileDb.addItem(message);
-
-  res.send(message);
 });
 
 export default router;
