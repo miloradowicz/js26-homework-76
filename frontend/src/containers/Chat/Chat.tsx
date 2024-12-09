@@ -23,7 +23,7 @@ const defaults = {
 
 const Chat = () => {
   const dispatch = useAppDispatch();
-  const { enqueueSnackbar } = useSnackbar();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const username = useAppSelector(selectUsername);
   const lastError = useAppSelector(selectLastError);
@@ -40,9 +40,10 @@ const Chat = () => {
 
   useEffect(() => {
     if (lastError) {
+      closeSnackbar();
       enqueueSnackbar(lastError.message, { variant: 'error' });
     }
-  }, [lastError, enqueueSnackbar]);
+  }, [lastError, enqueueSnackbar, closeSnackbar]);
 
   const handleOpen = () => {
     dispatch(openUsernameModal());
