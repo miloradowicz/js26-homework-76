@@ -5,7 +5,7 @@ import { Divider, IconButton, InputBase, Paper } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 
 import { useAppDispatch } from '@/app/hooks';
-import { sendMessage } from '@/store/thunks/chatThunk';
+import { loadMessages, sendMessage } from '@/store/thunks/chatThunk';
 
 const validate = (data: string) => {
   if (!data?.trim()) {
@@ -32,6 +32,7 @@ const MessageForm = () => {
     if (validate(data)) {
       await dispatch(sendMessage(data));
       setData('');
+      await dispatch(loadMessages());
     }
   };
 
