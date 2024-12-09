@@ -1,18 +1,19 @@
 import { Message } from '@/types';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { pollMessages, sendMessage } from '../thunks/chat';
+import { loadMessages, sendMessage } from '../thunks/chatThunk';
+import { RootState } from '@/app/store';
 
 interface State {
   username: string;
   messages: Message[];
   lastUpdated: number;
-  error?: {
+  lastError?: {
     message: string;
   };
 }
 
 const initialState: State = {
-  username: '',
+  username: 'miloradowicz',
   messages: [],
   lastUpdated: 0,
 };
@@ -22,10 +23,10 @@ const slice = createSlice({
   initialState,
   reducers: {
     setUsername: (state, { payload }: PayloadAction<string>) => {
-      state.error = undefined;
+      state.lastError = undefined;
 
       if (!payload) {
-        state.error = { message: 'Invalid username.' };
+        state.lastError = { message: 'Invalid username.' };
       } else {
         state.username = payload;
       }
@@ -33,27 +34,27 @@ const slice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(pollMessages.pending, (state) => {
-        state.error = undefined;
+      .addCase(loadMessages.pending, (state) => {
+        state.lastError = undefined;
       })
-      .addCase(pollMessages.fulfilled, (state, { payload }) => {
+      .addCase(loadMessages.fulfilled, (state, { payload }) => {
         state.messages = payload;
 
         state.lastUpdated = Math.max(
           ...state.messages.map((x) => Date.parse(x.datetime))
         );
       })
-      .addCase(pollMessages.rejected, (state, { error }) => {
+      .addCase(loadMessages.rejected, (state, { error }) => {
         if (error.message !== undefined) {
-          state.error = { message: error.message };
+          state.lastError = { message: error.message };
         }
       })
       .addCase(sendMessage.pending, (state) => {
-        state.error = undefined;
+        state.lastError = undefined;
       })
       .addCase(sendMessage.rejected, (state, { error }) => {
         if (error.message !== undefined) {
-          state.error = { message: error.message };
+          state.lastError = { message: error.message };
         }
       });
   },
@@ -62,3 +63,8 @@ const slice = createSlice({
 export const chatReducer = slice.reducer;
 
 export const { setUsername } = slice.actions;
+
+export const selectUsername = (state: RootState) => state.chatReducer.username;
+export const selectMessages = (state: RootState) => state.chatReducer.messages;
+export const selectLastError = (state: RootState) =>
+  state.chatReducer.lastError;
