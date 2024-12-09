@@ -4,5 +4,3 @@ export interface Message {
   message: string;
   datetime: string;
 }
-
-export type MessageBody = Omit<Message, 'id' | 'datetime'>;
