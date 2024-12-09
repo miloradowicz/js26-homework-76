@@ -24,7 +24,9 @@ router.post('/', async (req, res) => {
   const body = req.body as MessageBody;
 
   if (body.author || body.message) {
-    res.status(400).send();
+    res
+      .status(400)
+      .send({ error: 'Author and message must be present in the request.' });
   }
 
   const message = {
